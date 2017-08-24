@@ -1,18 +1,18 @@
 package main
 
+// [START admin_import]
 import (
 	"fmt"
-	"log"
 
 	"golang.org/x/net/context"
 
-	// [START admin_import]
 	firebase "github.com/firebase/firebase-admin-go"
 	"github.com/firebase/firebase-admin-go/auth"
-	// [END admin_import]
 
 	"google.golang.org/api/option"
 )
+
+// [END admin_import]
 
 // ==================================================================
 // https://firebase.google.com/docs/admin/setup
@@ -38,7 +38,7 @@ func initializeAppWithRefreshToken() (*firebase.App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
-	// [START initialize_app_refresh_token]
+	// [END initialize_app_refresh_token]
 
 	return app, nil
 }
@@ -174,7 +174,8 @@ func verifyIDToken(app *firebase.App, idToken string) (*auth.Token, error) {
 func main() {
 	app, err := initializeAppWithServiceAccount()
 	if err != nil {
-		log.Fatalf("error initializing app: %v", err)
+		fmt.Printf("error initializing app: %v", err)
+		return
 	}
 
 	_, err = createCustomToken(app)
