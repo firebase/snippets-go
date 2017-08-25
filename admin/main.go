@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	firebase "github.com/firebase/firebase-admin-go"
-	"github.com/firebase/firebase-admin-go/auth"
+	firebase "firebase.google.com/go"
+	"firebase.google.com/go/auth"
 
 	"google.golang.org/api/option"
 )
@@ -20,7 +20,7 @@ import (
 
 func initializeAppWithServiceAccount() (*firebase.App, error) {
 	// [START initialize_app_service_account]
-	opt := option.WithCredentialsFile("service-account.json")
+	opt := option.WithCredentialsFile("path/to/serviceAccountKey.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing app: %v", err)
@@ -32,7 +32,7 @@ func initializeAppWithServiceAccount() (*firebase.App, error) {
 
 func initializeAppWithRefreshToken() (*firebase.App, error) {
 	// [START initialize_app_refresh_token]
-	opt := option.WithCredentialsFile("refresh-token.json")
+	opt := option.WithCredentialsFile("path/to/refreshToken.json")
 	config := &firebase.Config{ProjectID: "my-project-id"}
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
@@ -174,7 +174,7 @@ func verifyIDToken(app *firebase.App, idToken string) (*auth.Token, error) {
 func main() {
 	app, err := initializeAppWithServiceAccount()
 	if err != nil {
-		fmt.Printf("error initializing app: %v", err)
+		fmt.Printf("error initializing app: %v\n", err)
 		return
 	}
 
