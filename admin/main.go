@@ -184,6 +184,10 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 	return token
 }
 
+// ==================================================================
+// https://firebase.google.com/docs/storage/admin/start
+// ==================================================================
+
 func cloudStorage() {
 	// [START cloud_storage]
 	config := &firebase.Config{
