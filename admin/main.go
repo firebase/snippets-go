@@ -216,6 +216,21 @@ func cloudStorage() {
 	log.Printf("Created bucket handle: %v\n", bucket)
 }
 
+func cloudStorageCustomBucket(app *firebase.App) {
+	client, err := app.Storage(context.Background())
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// [START cloud_storage_custom_bucket]
+	bucket, err := client.Bucket("my-custom-bucket")
+	// [END cloud_storage_custom_bucket]
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Printf("Created bucket handle: %v\n", bucket)
+}
+
 func main() {
 	app := initializeAppWithServiceAccount()
 
@@ -223,4 +238,5 @@ func main() {
 	_ = createCustomTokenWithClaims(app)
 	_ = verifyIDToken(app, "some-token")
 	cloudStorage()
+	cloudStorageCustomBucket(app)
 }
