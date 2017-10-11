@@ -16,7 +16,7 @@ package main
 
 // [START admin_import]
 import (
-	"log"
+	"fmt"
 
 	"golang.org/x/net/context"
 
@@ -32,40 +32,40 @@ import (
 // https://firebase.google.com/docs/admin/setup
 // ==================================================================
 
-func initializeAppWithServiceAccount() *firebase.App {
+func initializeAppWithServiceAccount() (*firebase.App, error) {
 	// [START initialize_app_service_account]
 	opt := option.WithCredentialsFile("path/to/serviceAccountKey.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 	// [END initialize_app_service_account]
 
-	return app
+	return app, nil
 }
 
-func initializeAppWithRefreshToken() *firebase.App {
+func initializeAppWithRefreshToken() (*firebase.App, error) {
 	// [START initialize_app_refresh_token]
 	opt := option.WithCredentialsFile("path/to/refreshToken.json")
 	config := &firebase.Config{ProjectID: "my-project-id"}
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 	// [END initialize_app_refresh_token]
 
-	return app
+	return app, nil
 }
 
-func initializeAppDefault() *firebase.App {
+func initializeAppDefault() (*firebase.App, error) {
 	// [START initialize_app_default]
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 	// [END initialize_app_default]
 
-	return app
+	return app, nil
 }
 
 func accessServicesSingleApp() (*auth.Client, error) {
@@ -73,13 +73,13 @@ func accessServicesSingleApp() (*auth.Client, error) {
 	// Initialize default app
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 
 	// Access auth service from the default app
-	client, err := app.Auth(context.Background())
+	client, err := app.Auth()
 	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
+		return nil, fmt.Errorf("error getting Auth client: %v", err)
 	}
 	// [END access_services_single_app]
 
@@ -91,28 +91,29 @@ func accessServicesMultipleApp() (*auth.Client, error) {
 	// Initialize the default app
 	defaultApp, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 
 	// Initialize another app with a different config
 	opt := option.WithCredentialsFile("service-account-other.json")
 	otherApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 
 	// Access Auth service from default app
-	defaultClient, err := defaultApp.Auth(context.Background())
+	defaultClient, err := defaultApp.Auth()
 	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
+		return nil, fmt.Errorf("error getting Auth client: %v", err)
 	}
 
 	// Access auth service from other app
-	otherClient, err := otherApp.Auth(context.Background())
+	otherClient, err := otherApp.Auth()
 	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
+		return nil, fmt.Errorf("error getting Auth client: %v", err)
 	}
 	// [END access_services_multiple_app]
+
 	// Avoid unused
 	_ = defaultClient
 	return otherClient, nil
@@ -122,29 +123,29 @@ func accessServicesMultipleApp() (*auth.Client, error) {
 // https://firebase.google.com/docs/auth/admin/create-custom-tokens
 // ==================================================================
 
-func createCustomToken(app *firebase.App) string {
+func createCustomToken(app *firebase.App) (string, error) {
 	// [START create_custom_token]
-	client, err := app.Auth(context.Background())
+	client, err := app.Auth()
 	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
+		return "", fmt.Errorf("error getting Auth client: %v", err)
 	}
 
 	token, err := client.CustomToken("some-uid")
 	if err != nil {
-		log.Fatalf("error minting custom token: %v\n", err)
+		return "", fmt.Errorf("error minting custom token: %v", err)
 	}
 
-	log.Printf("Got custom token: %v\n", token)
+	fmt.Printf("Got custom token: %v\n", token)
 	// [END create_custom_token]
 
-	return token
+	return token, nil
 }
 
-func createCustomTokenWithClaims(app *firebase.App) string {
+func createCustomTokenWithClaims(app *firebase.App) (string, error) {
 	// [START create_custom_token_claims]
-	client, err := app.Auth(context.Background())
+	client, err := app.Auth()
 	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
+		return "", fmt.Errorf("error getting Auth client: %v", err)
 	}
 
 	claims := map[string]interface{}{
@@ -153,90 +154,56 @@ func createCustomTokenWithClaims(app *firebase.App) string {
 
 	token, err := client.CustomTokenWithClaims("some-uid", claims)
 	if err != nil {
-		log.Fatalf("error minting custom token: %v\n", err)
+		return "", fmt.Errorf("error minting custom token: %v", err)
 	}
 
-	log.Printf("Got custom token: %v\n", token)
+	fmt.Printf("Got custom token: %v\n", token)
 	// [END create_custom_token_claims]
 
-	return token
+	return token, nil
 }
 
 // ==================================================================
 // https://firebase.google.com/docs/auth/admin/verify-id-tokens
 // ==================================================================
 
-func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
+func verifyIDToken(app *firebase.App, idToken string) (*auth.Token, error) {
 	// [START verify_id_token]
-	client, err := app.Auth(context.Background())
+	client, err := app.Auth()
 	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
+		return nil, fmt.Errorf("error getting Auth client: %v", err)
 	}
 
 	token, err := client.VerifyIDToken(idToken)
 	if err != nil {
-		log.Fatalf("error verifying ID token: %v\n", err)
+		return nil, fmt.Errorf("error verifying ID token: %v", err)
 	}
 
-	log.Printf("Verified ID token: %v\n", token)
+	fmt.Printf("Verified ID token: %v\n", token)
 	// [END verify_id_token]
 
-	return token
-}
-
-// ==================================================================
-// https://firebase.google.com/docs/storage/admin/start
-// ==================================================================
-
-func cloudStorage() {
-	// [START cloud_storage]
-	config := &firebase.Config{
-		StorageBucket: "<BUCKET_NAME>.appspot.com",
-	}
-	opt := option.WithCredentialsFile("path/to/serviceAccountKey.json")
-	app, err := firebase.NewApp(context.Background(), config, opt)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	client, err := app.Storage(context.Background())
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	bucket, err := client.DefaultBucket()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	// 'bucket' is an object defined in the cloud.google.com/go/storage package.
-	// See https://godoc.org/cloud.google.com/go/storage#BucketHandle
-	// for more details.
-	// [END cloud_storage]
-
-	log.Printf("Created bucket handle: %v\n", bucket)
-}
-
-func cloudStorageCustomBucket(app *firebase.App) {
-	client, err := app.Storage(context.Background())
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// [START cloud_storage_custom_bucket]
-	bucket, err := client.Bucket("my-custom-bucket")
-	// [END cloud_storage_custom_bucket]
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Printf("Created bucket handle: %v\n", bucket)
+	return token, nil
 }
 
 func main() {
-	app := initializeAppWithServiceAccount()
+	app, err := initializeAppWithServiceAccount()
+	if err != nil {
+		fmt.Printf("error initializing app: %v\n", err)
+		return
+	}
 
-	_ = createCustomToken(app)
-	_ = createCustomTokenWithClaims(app)
-	_ = verifyIDToken(app, "some-token")
-	cloudStorage()
-	cloudStorageCustomBucket(app)
+	_, err = createCustomToken(app)
+	if err != nil {
+		fmt.Printf("Error in createCustomToken: %v\n", err)
+	}
+
+	_, err = createCustomTokenWithClaims(app)
+	if err != nil {
+		fmt.Printf("Error in createCustomTokenWithClaims: %v\n", err)
+	}
+
+	_, err = verifyIDToken(app, "some-token")
+	if err != nil {
+		fmt.Printf("Error in verifyIDToken: %v\n", err)
+	}
 }
