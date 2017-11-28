@@ -247,6 +247,19 @@ func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	return u
 }
 
+func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
+	uid := "something"
+	// [START create_user]
+	u, err := client.CreateUser(context.Background(),
+		&auth.UserParams{UID: ptr.String(uid), Email: ptr.String("user@example.com"), PhoneNumber: ptr.String("+15555550100")})
+	if err != nil {
+		log.Fatalf("error creating user: %v\n", err)
+	}
+	log.Printf("Successfully created user: %v\n", u)
+	// [END create_user]
+	return u
+}
+
 func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "d"
 	// [START update_user]
