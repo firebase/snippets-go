@@ -22,6 +22,7 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"firebase.google.com/go/ptr"
 
 	"google.golang.org/api/option"
 )
@@ -182,6 +183,58 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 	// [END verify_id_token]
 
 	return token
+}
+
+// ==================================================================
+// https://firebase.google.com/docs/auth/admin/manage-users
+// ==================================================================
+
+func getUser(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+	// [START get_user]
+	uid := "some_string_uid"
+	u, err := client.GetUser(ctx, uid)
+	if err != nil {
+		log.Fatalf("error getting user %s: %v\n", uid, err)
+	}
+	log.Printf("Successfully fetched user data: %v\n", u)
+	// [END get_user]
+	return u
+}
+
+func getUserByEmail(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+	// [START get_user_by_email]
+	email := "some@email.com"
+	u, err := client.GetUserByEmail(ctx, email)
+	if err != nil {
+		log.Fatalf("error getting user by email %s: %v\n", email, err)
+	}
+	log.Printf("Successfully fetched user data: %v\n", u)
+	// [END get_user_by_email]
+	return u
+}
+
+func getUserByPhone(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+	// [START get_user_by_phone]
+	phone := "+13214567890"
+	u, err := client.GetUserByPhoneNumber(ctx, phone)
+	if err != nil {
+		log.Fatalf("error getting user by phone %s: %v\n", phone, err)
+	}
+	log.Printf("Successfully fetched user data: %v\n", u)
+	// [END get_user_by_phone]
+	return u
+}
+
+func createUser(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+	uid := "userid"
+	u, err := client.CreateUser(context.Background(), &auth.UserParams{
+		UID:          ptr.String(uid),
+		Email:        ptr.String(uid + "@test.com"),
+		DisplayName:  ptr.String("display_name"),
+		Password:     ptr.String("assawd"),
+		CustomClaims: map[string]interface{}{"asssssdf": true, "asssssdfdf": "ffd"},
+	})
+
 }
 
 // ==================================================================
