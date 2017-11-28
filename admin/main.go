@@ -307,6 +307,23 @@ loop:
 			log.Fatalf("error listing users: %s\n", err)
 		}
 	}
+
+	// Iterating by pages 7 users at a time
+	iter2 := client.Users(context.Background(), "")
+	pager := iterator.NewPager(iter2, 7, "")
+	for {
+		var users []*auth.ExportedUserRecord
+		nextPageToken, err := pager.NextPage(&users)
+		if err != nil {
+			log.Fatalf("paging error %v", err)
+		}
+		for _, u := range users {
+			log.Printf("read user user: %v\n", u)
+		}
+		if nextPageToken == "" {
+			break
+		}
+	}
 	// [END list_users]
 }
 
