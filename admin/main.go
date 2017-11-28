@@ -24,6 +24,7 @@ import (
 	"firebase.google.com/go/auth"
 	"firebase.google.com/go/ptr"
 
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -189,7 +190,7 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 // https://firebase.google.com/docs/auth/admin/manage-users
 // ==================================================================
 
-func getUser(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+func getUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	// [START get_user]
 	uid := "some_string_uid"
 	u, err := client.GetUser(ctx, uid)
@@ -201,7 +202,7 @@ func getUser(ctx context.Context, app *firebase.App, client *auth.Client) *auth.
 	return u
 }
 
-func getUserByEmail(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+func getUserByEmail(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	// [START get_user_by_email]
 	email := "some@email.com"
 	u, err := client.GetUserByEmail(ctx, email)
@@ -213,7 +214,7 @@ func getUserByEmail(ctx context.Context, app *firebase.App, client *auth.Client)
 	return u
 }
 
-func getUserByPhone(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
+func getUserByPhone(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	// [START get_user_by_phone]
 	phone := "+13214567890"
 	u, err := client.GetUserByPhoneNumber(ctx, phone)
@@ -225,16 +226,74 @@ func getUserByPhone(ctx context.Context, app *firebase.App, client *auth.Client)
 	return u
 }
 
-func createUser(ctx context.Context, app *firebase.App, client *auth.Client) *auth.UserRecord {
-	uid := "userid"
-	u, err := client.CreateUser(context.Background(), &auth.UserParams{
-		UID:          ptr.String(uid),
-		Email:        ptr.String(uid + "@test.com"),
-		DisplayName:  ptr.String("display_name"),
-		Password:     ptr.String("assawd"),
-		CustomClaims: map[string]interface{}{"asssssdf": true, "asssssdfdf": "ffd"},
-	})
+func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
+	// [START create_user]
+	u, err := client.CreateUser(context.Background(),
+		&auth.UserParams{
+			Email:         ptr.String("user@example.com"),
+			EmailVerified: ptr.Bool(false),
+			PhoneNumber:   ptr.String("+15555550100"),
+			Password:      ptr.String("secretPassword"),
+			DisplayName:   ptr.String("John Doe"),
+			PhotoURL:      ptr.String("http://www.example.com/12345678/photo.png"),
+			Disabled:      ptr.Bool(false),
+		})
+	if err != nil {
+		log.Fatalf("error creating user: %v\n", err)
+	}
+	log.Printf("Successfully created user: %v\n", u)
+	// [START create_user]
+	return u
+}
 
+func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
+	uid := "d"
+	// [START update_user]
+	u, err := client.UpdateUser(context.Background(), uid,
+		&auth.UserParams{
+			Email:         ptr.String("user@example.com"),
+			EmailVerified: ptr.Bool(true),
+			PhoneNumber:   ptr.String("+15555550100"),
+			Password:      ptr.String("newPassword"),
+			DisplayName:   ptr.String("John Doe"),
+			PhotoURL:      ptr.String("http://www.example.com/12345678/photo.png"),
+			Disabled:      ptr.Bool(true),
+		})
+	if err != nil {
+		log.Fatalf("error updating user: %v\n", err)
+	}
+	log.Printf("Successfully updated user: %v\n", u)
+	// [START update_user]
+	return u
+}
+
+func deleteUser(ctx context.Context, client *auth.Client) {
+	uid := "d"
+	// [START delete_user]
+	err := client.DeleteUser(context.Background(), uid)
+	if err != nil {
+		log.Fatalf("error deleting user: %v\n", err)
+	}
+	log.Printf("Successfully deleted user: %s\n", uid)
+	// [START delete_user]
+}
+
+func listUsers(ctx context.Context, client *auth.Client) {
+	// [START list_users]
+	iter := client.Users(context.Background(), "")
+loop:
+	for {
+		user, err := iter.Next()
+		switch err {
+		case nil:
+			log.Printf("read user user: %v\n", user)
+		case iterator.Done: // this is a special error value.
+			break loop
+		default:
+			log.Fatalf("error listing users: %s\n", err)
+		}
+	}
+	// [START list_users]
 }
 
 // ==================================================================
