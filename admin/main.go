@@ -262,7 +262,7 @@ func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 
 func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "d"
-	// [START update_user]
+	// [START update_user_with_uid]
 	u, err := client.UpdateUser(context.Background(), uid,
 		&auth.UserParams{
 			Email:         ptr.String("user@example.com"),
@@ -277,7 +277,7 @@ func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 		log.Fatalf("error updating user: %v\n", err)
 	}
 	log.Printf("Successfully updated user: %v\n", u)
-	// [END update_user]
+	// [END update_user_with_uid]
 	return u
 }
 
