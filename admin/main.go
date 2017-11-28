@@ -191,8 +191,9 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 // ==================================================================
 
 func getUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
-	// [START get_user]
 	uid := "some_string_uid"
+
+	// [START get_user]
 	u, err := client.GetUser(ctx, uid)
 	if err != nil {
 		log.Fatalf("error getting user %s: %v\n", uid, err)
@@ -203,8 +204,8 @@ func getUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 }
 
 func getUserByEmail(ctx context.Context, client *auth.Client) *auth.UserRecord {
-	// [START get_user_by_email]
 	email := "some@email.com"
+	// [START get_user_by_email]
 	u, err := client.GetUserByEmail(ctx, email)
 	if err != nil {
 		log.Fatalf("error getting user by email %s: %v\n", email, err)
@@ -215,8 +216,8 @@ func getUserByEmail(ctx context.Context, client *auth.Client) *auth.UserRecord {
 }
 
 func getUserByPhone(ctx context.Context, client *auth.Client) *auth.UserRecord {
-	// [START get_user_by_phone]
 	phone := "+13214567890"
+	// [START get_user_by_phone]
 	u, err := client.GetUserByPhoneNumber(ctx, phone)
 	if err != nil {
 		log.Fatalf("error getting user by phone %s: %v\n", phone, err)
@@ -242,7 +243,7 @@ func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 		log.Fatalf("error creating user: %v\n", err)
 	}
 	log.Printf("Successfully created user: %v\n", u)
-	// [START create_user]
+	// [END create_user]
 	return u
 }
 
@@ -263,7 +264,7 @@ func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 		log.Fatalf("error updating user: %v\n", err)
 	}
 	log.Printf("Successfully updated user: %v\n", u)
-	// [START update_user]
+	// [END update_user]
 	return u
 }
 
@@ -275,7 +276,7 @@ func deleteUser(ctx context.Context, client *auth.Client) {
 		log.Fatalf("error deleting user: %v\n", err)
 	}
 	log.Printf("Successfully deleted user: %s\n", uid)
-	// [START delete_user]
+	// [END delete_user]
 }
 
 func listUsers(ctx context.Context, client *auth.Client) {
@@ -293,7 +294,7 @@ loop:
 			log.Fatalf("error listing users: %s\n", err)
 		}
 	}
-	// [START list_users]
+	// [END list_users]
 }
 
 // ==================================================================
