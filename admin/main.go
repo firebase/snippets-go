@@ -249,20 +249,20 @@ func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 
 func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "something"
-	// [START create_user]
+	// [START create_user_with_uid]
 	u, err := client.CreateUser(context.Background(),
 		&auth.UserParams{UID: ptr.String(uid), Email: ptr.String("user@example.com"), PhoneNumber: ptr.String("+15555550100")})
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
 	}
 	log.Printf("Successfully created user: %v\n", u)
-	// [END create_user]
+	// [END create_user_with_uid]
 	return u
 }
 
 func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "d"
-	// [START update_user_with_uid]
+	// [START update_user]
 	u, err := client.UpdateUser(context.Background(), uid,
 		&auth.UserParams{
 			Email:         ptr.String("user@example.com"),
@@ -277,7 +277,7 @@ func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 		log.Fatalf("error updating user: %v\n", err)
 	}
 	log.Printf("Successfully updated user: %v\n", u)
-	// [END update_user_with_uid]
+	// [END update_user]
 	return u
 }
 
