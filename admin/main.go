@@ -295,17 +295,17 @@ func deleteUser(ctx context.Context, client *auth.Client) {
 func listUsers(ctx context.Context, client *auth.Client) {
 	// [START list_users]
 	iter := client.Users(context.Background(), "")
-loop:
+
 	for {
 		user, err := iter.Next()
-		switch err {
-		case nil:
-			log.Printf("read user user: %v\n", user)
-		case iterator.Done: // this is a special error value.
-			break loop
-		default:
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
 			log.Fatalf("error listing users: %s\n", err)
 		}
+		log.Printf("read user user: %v\n", user)
+
 	}
 
 	// Iterating by pages 7 users at a time
