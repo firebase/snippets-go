@@ -22,7 +22,6 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
-	"firebase.google.com/go/ptr"
 
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -230,15 +229,15 @@ func getUserByPhone(ctx context.Context, client *auth.Client) *auth.UserRecord {
 func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	// [START create_user]
 	u, err := client.CreateUser(context.Background(),
-		&auth.UserParams{
-			Email:         ptr.String("user@example.com"),
-			EmailVerified: ptr.Bool(false),
-			PhoneNumber:   ptr.String("+15555550100"),
-			Password:      ptr.String("secretPassword"),
-			DisplayName:   ptr.String("John Doe"),
-			PhotoURL:      ptr.String("http://www.example.com/12345678/photo.png"),
-			Disabled:      ptr.Bool(false),
-		})
+		(&auth.UserToCreate{}).
+			Email("user@example.com").
+			EmailVerified(false).
+			PhoneNumber("+15555550100").
+			Password("secretPassword").
+			DisplayName("John Doe").
+			PhotoURL("http://www.example.com/12345678/photo.png").
+			Disabled(false))
+
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
 	}
@@ -251,28 +250,35 @@ func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "something"
 	// [START create_user_with_uid]
 	u, err := client.CreateUser(context.Background(),
-		&auth.UserParams{UID: ptr.String(uid), Email: ptr.String("user@example.com"), PhoneNumber: ptr.String("+15555550100")})
+		(&auth.UserToCreate{}).UID(uid).Email("user@example.com").PhoneNumber("+15555550100"))
+	// alternatively
+	params := auth.UserToCreate{}
+	// or: 	var params auth.UserToCreate
+	u2, err := client.CreateUser(context.Background(),
+		params.UID(uid).Email("user@example.com").PhoneNumber("+15555550100"))
+	// alternatively
+
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
 	}
 	log.Printf("Successfully created user: %v\n", u)
 	// [END create_user_with_uid]
-	return u
+	return u2
 }
 
 func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "d"
 	// [START update_user]
 	u, err := client.UpdateUser(context.Background(), uid,
-		&auth.UserParams{
-			Email:         ptr.String("user@example.com"),
-			EmailVerified: ptr.Bool(true),
-			PhoneNumber:   ptr.String("+15555550100"),
-			Password:      ptr.String("newPassword"),
-			DisplayName:   ptr.String("John Doe"),
-			PhotoURL:      ptr.String("http://www.example.com/12345678/photo.png"),
-			Disabled:      ptr.Bool(true),
-		})
+		(&auth.UserToUpdate{}).
+			Email("user@example.com").
+			EmailVerified(true).
+			PhoneNumber("+15555550100").
+			Password("newPassword").
+			DisplayName("John Doe").
+			PhotoURL("http://www.example.com/12345678/photo.png").
+			Disabled(true))
+	// see "CreateUser, above for syntax alteratives to (&auth.UserTo...{})"
 	if err != nil {
 		log.Fatalf("error updating user: %v\n", err)
 	}
@@ -290,6 +296,28 @@ func deleteUser(ctx context.Context, client *auth.Client) {
 	}
 	log.Printf("Successfully deleted user: %s\n", uid)
 	// [END delete_user]
+}
+
+func customClaims(ctx context.Context, client *auth.Client) {
+	uid := "uid"
+	// [START custom_claims]
+
+	// erase all existing custom claims
+	err := client.SetCustomUserClaims(context.Background(), uid, nil)
+	if err != nil {
+		log.Fatalf("error removing custom claims %v", err)
+	}
+	// add custom claims
+	err = client.SetCustomUserClaims(context.Background(), uid, map[string]interface{}{"2custom": "2claims"})
+	if err != nil {
+		log.Fatalf("error setting custom claims %v", err)
+	}
+	// Alternatively
+	_, err = client.UpdateUser(context.Background(), uid,
+		(&auth.UserToUpdate{}).CustomClaims(map[string]interface{}{"2custom": "2claims"}))
+
+	// [END custom_claims]
+
 }
 
 func listUsers(ctx context.Context, client *auth.Client) {
