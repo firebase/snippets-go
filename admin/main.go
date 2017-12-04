@@ -264,7 +264,7 @@ func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	return u2
 }
 
-func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
+func updateUser(ctx context.Context, client *auth.Client) (*auth.UserRecord, *auth.UserRecord) {
 	uid := "d"
 	// [START update_user]
 	u, err := client.UpdateUser(context.Background(), uid,
@@ -276,13 +276,17 @@ func updateUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 			DisplayName("John Doe").
 			PhotoURL("http://www.example.com/12345678/photo.png").
 			Disabled(true))
-	// see "CreateUser, above for syntax alteratives to (&auth.UserTo...{})"
+	// Alternatively
+	params := auth.UserToUpdate{} // also possible: 	var params auth.UserToUpdate
+	u2, err := client.UpdateUser(context.Background(), uid,
+		params.Email("user@example.com").PhoneNumber("+15555550100"))
+
 	if err != nil {
 		log.Fatalf("error updating user: %v\n", err)
 	}
 	log.Printf("Successfully updated user: %v\n", u)
 	// [END update_user]
-	return u
+	return u, u2
 }
 
 func deleteUser(ctx context.Context, client *auth.Client) {
