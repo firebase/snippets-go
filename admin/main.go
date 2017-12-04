@@ -251,12 +251,10 @@ func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	// [START create_user_with_uid]
 	u, err := client.CreateUser(context.Background(),
 		(&auth.UserToCreate{}).UID(uid).Email("user@example.com").PhoneNumber("+15555550100"))
-	// alternatively
-	params := auth.UserToCreate{}
-	// or: 	var params auth.UserToCreate
+	// Alternatively
+	params := auth.UserToCreate{} // also possible: 	var params auth.UserToCreate
 	u2, err := client.CreateUser(context.Background(),
 		params.UID(uid).Email("user@example.com").PhoneNumber("+15555550100"))
-	// alternatively
 
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
