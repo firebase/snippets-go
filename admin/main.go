@@ -189,10 +189,16 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 // https://firebase.google.com/docs/auth/admin/manage-users
 // ==================================================================
 
-func getUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
+func getUser(ctx context.Context, app *firebase.App) *auth.UserRecord {
 	uid := "some_string_uid"
 
 	// [START get_user]
+
+	client, err := app.Auth(context.Background())
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+
 	u, err := client.GetUser(ctx, uid)
 	if err != nil {
 		log.Fatalf("error getting user %s: %v\n", uid, err)
