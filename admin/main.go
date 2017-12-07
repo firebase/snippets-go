@@ -234,15 +234,15 @@ func getUserByPhone(ctx context.Context, client *auth.Client) *auth.UserRecord {
 
 func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	// [START create_user]
-	u, err := client.CreateUser(context.Background(),
-		(&auth.UserToCreate{}).
-			Email("user@example.com").
-			EmailVerified(false).
-			PhoneNumber("+15555550100").
-			Password("secretPassword").
-			DisplayName("John Doe").
-			PhotoURL("http://www.example.com/12345678/photo.png").
-			Disabled(false))
+	params := (&auth.UserToCreate{}).
+		Email("user@example.com").
+		EmailVerified(false).
+		PhoneNumber("+15555550100").
+		Password("secretPassword").
+		DisplayName("John Doe").
+		PhotoURL("http://www.example.com/12345678/photo.png").
+		Disabled(false)
+	u, err := client.CreateUser(context.Background(), params)
 
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
