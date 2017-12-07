@@ -243,7 +243,6 @@ func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 		PhotoURL("http://www.example.com/12345678/photo.png").
 		Disabled(false)
 	u, err := client.CreateUser(context.Background(), params)
-
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
 	}
@@ -252,7 +251,7 @@ func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	return u
 }
 
-func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
+func createUserWithUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "something"
 	// [START create_user_with_uid]
 	params := (&auth.UserToCreate{}).
@@ -329,8 +328,8 @@ func customClaimsVerify(ctx context.Context, client *auth.Client) {
 	}
 
 	claims := token.Claims
-	if adminVal, found := claims["admin"]; found {
-		if admin, ok := adminVal.(bool); ok && admin {
+	if admin, ok := claims["admin"]; ok {
+		if admin.(bool) {
 			//Allow access to requested admin resource.
 		}
 	}
@@ -346,8 +345,8 @@ func customClaimsRead(ctx context.Context, client *auth.Client) {
 		log.Fatal(err)
 	}
 	// The claims can be accessed on the user record.
-	if adminVal, found := user.CustomClaims["admin"]; found {
-		if admin, ok := adminVal.(bool); ok && admin {
+	if admin, ok := user.CustomClaims["admin"]; ok {
+		if admin.(bool) {
 			log.Println(admin)
 		}
 	}
@@ -408,8 +407,7 @@ func listUsers(ctx context.Context, client *auth.Client) {
 	// Iterating by pages 100 users at a time.
 	// Note that using both the Next() function on an iterator and the NextPage()
 	// on a Pager wrapping that same iterator will result in an error.
-	iter2 := client.Users(context.Background(), "")
-	pager := iterator.NewPager(iter2, 100, "")
+	pager := iterator.NewPager(client.Users(context.Background(), ""), 100, "")
 	for {
 		var users []*auth.ExportedUserRecord
 		nextPageToken, err := pager.NextPage(&users)
