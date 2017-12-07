@@ -193,7 +193,7 @@ func getUser(ctx context.Context, app *firebase.App) *auth.UserRecord {
 	uid := "some_string_uid"
 
 	// [START get_user]
-
+	// Get an auth client from the firebase.App
 	client, err := app.Auth(context.Background())
 	if err != nil {
 		log.Fatalf("error getting Auth client: %v\n", err)
@@ -298,9 +298,9 @@ func deleteUser(ctx context.Context, client *auth.Client) {
 	// [END delete_user]
 }
 
-func customClaims(ctx context.Context, app *firebase.App) {
+func customClaimsSet(ctx context.Context, app *firebase.App) {
 	uid := "uid"
-	// [START custom_claims]
+	// [START set_custom_user_claims]
 	// Get an auth client from the firebase.App
 	client, err := app.Auth(context.Background())
 	if err != nil {
@@ -315,23 +315,85 @@ func customClaims(ctx context.Context, app *firebase.App) {
 	}
 	// The new custom claims will propagate to the user's ID token the
 	// next time a new one is issued.
-	// [END custom_claims]
+	// [END set_custom_user_claims]
 	// erase all existing custom claims
-	err = client.SetCustomUserClaims(context.Background(), uid, nil)
+}
+
+func customClaimsVerify(ctx context.Context, client *auth.Client) {
+	idToken := "token"
+	// [START verify_custom_claims]
+	// Verify the ID token first.
+	token, err := client.VerifyIDToken(idToken)
 	if err != nil {
-		log.Fatalf("error removing custom claims %v", err)
+		log.Fatal(err)
 	}
 
-	// Alternatively
-	_, err = client.UpdateUser(context.Background(), uid,
-		(&auth.UserToUpdate{}).CustomClaims(map[string]interface{}{"2custom": "2claims"}))
+	claims := token.Claims
+	if adminVal, found := claims["admin"]; found {
+		if admin, ok := adminVal.(bool); ok && admin {
+			//Allow access to requested admin resource.
+		}
+	}
+	// [END verify_custom_claims]
+}
 
+func customClaimsRead(ctx context.Context, client *auth.Client) {
+	uid := "uid"
+	// [START read_custom_user_claims]
+	// Lookup the user associated with the specified uid.
+	user, err := client.GetUser(ctx, uid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// The claims can be accessed on the user record.
+	if adminVal, found := user.CustomClaims["admin"]; found {
+		if admin, ok := adminVal.(bool); ok && admin {
+			log.Println(admin)
+		}
+	}
+	// [END read_custom_user_claims]
+}
+
+func customClaimsScript(ctx context.Context, client *auth.Client) {
+	// [START set_custom_user_claims_script]
+	user, err := client.GetUserByEmail(ctx, "user@admin.example.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Confirm user is verified
+	if user.EmailVerified {
+		// Add custom claims for additional privileges.
+		// This will be picked up by the user on token refresh or next sign in on new device.
+		client.SetCustomUserClaims(ctx, user.UID, map[string]interface{}{"admin": true})
+	}
+	// [END set_custom_user_claims_script]
+}
+
+func customClaimsIncremental(ctx context.Context, client *auth.Client) {
+	// [START set_custom_user_claims_incremental]
+	user, err := client.GetUserByEmail(ctx, "user@admin.example.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Add incremental custom claim without overwriting existing claims.
+	currentCustomClaims := user.CustomClaims
+	if currentCustomClaims == nil {
+		currentCustomClaims = map[string]interface{}{}
+	}
+
+	if _, found := currentCustomClaims["admin"]; found {
+		// Add level.
+		currentCustomClaims["ssLevel"] = 10
+		// Add custom claims for additional privileges.
+		client.SetCustomUserClaims(ctx, user.UID, currentCustomClaims)
+	}
+	// [END set_custom_user_claims_incremental]
 }
 
 func listUsers(ctx context.Context, client *auth.Client) {
-	// [START list_users]
+	// [START list_all_users]
+	// Note, behind the scenes, the Users() iterator will retrive 1000 Users at a time through the API
 	iter := client.Users(context.Background(), "")
-
 	for {
 		user, err := iter.Next()
 		if err == iterator.Done {
@@ -341,7 +403,6 @@ func listUsers(ctx context.Context, client *auth.Client) {
 			log.Fatalf("error listing users: %s\n", err)
 		}
 		log.Printf("read user user: %v\n", user)
-
 	}
 
 	// Iterating by pages 100 users at a time.
@@ -362,7 +423,7 @@ func listUsers(ctx context.Context, client *auth.Client) {
 			break
 		}
 	}
-	// [END list_users]
+	// [END list_all_users]
 }
 
 // ==================================================================
