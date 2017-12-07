@@ -314,9 +314,9 @@ func customClaims(ctx context.Context, client *auth.Client) {
 		log.Fatalf("error removing custom claims %v", err)
 	}
 	// [START custom_claims]
-
-	// add custom claims
-	err = client.SetCustomUserClaims(context.Background(), uid, map[string]interface{}{"admin": true})
+	// Set custom claims.
+	claims := map[string]interface{}{"admin": true}
+	err = client.SetCustomUserClaims(context.Background(), uid, claims)
 	if err != nil {
 		log.Fatalf("error setting custom claims %v", err)
 	}
