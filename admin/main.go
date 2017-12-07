@@ -420,7 +420,7 @@ func listUsers(ctx context.Context, client *auth.Client) {
 		var users []*auth.ExportedUserRecord
 		nextPageToken, err := pager.NextPage(&users)
 		if err != nil {
-			log.Fatalf("paging error %v", err)
+			log.Fatalf("paging error %v\n", err)
 		}
 		for _, u := range users {
 			log.Printf("read user user: %v\n", u)
