@@ -308,23 +308,23 @@ func deleteUser(ctx context.Context, client *auth.Client) {
 
 func customClaims(ctx context.Context, client *auth.Client) {
 	uid := "uid"
-	// [START custom_claims]
-
 	// erase all existing custom claims
 	err := client.SetCustomUserClaims(context.Background(), uid, nil)
 	if err != nil {
 		log.Fatalf("error removing custom claims %v", err)
 	}
+	// [START custom_claims]
+
 	// add custom claims
-	err = client.SetCustomUserClaims(context.Background(), uid, map[string]interface{}{"2custom": "2claims"})
+	err = client.SetCustomUserClaims(context.Background(), uid, map[string]interface{}{"admin": true})
 	if err != nil {
 		log.Fatalf("error setting custom claims %v", err)
 	}
+	// [END custom_claims]
+
 	// Alternatively
 	_, err = client.UpdateUser(context.Background(), uid,
 		(&auth.UserToUpdate{}).CustomClaims(map[string]interface{}{"2custom": "2claims"}))
-
-	// [END custom_claims]
 
 }
 
