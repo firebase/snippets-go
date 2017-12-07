@@ -255,44 +255,36 @@ func createUser(ctx context.Context, client *auth.Client) *auth.UserRecord {
 func createUserWUID(ctx context.Context, client *auth.Client) *auth.UserRecord {
 	uid := "something"
 	// [START create_user_with_uid]
-	u, err := client.CreateUser(context.Background(),
-		(&auth.UserToCreate{}).UID(uid).Email("user@example.com").PhoneNumber("+15555550100"))
-	// Alternatively
-	params := auth.UserToCreate{} // also possible: 	var params auth.UserToCreate
-	u2, err := client.CreateUser(context.Background(),
-		params.UID(uid).Email("user@example.com").PhoneNumber("+15555550100"))
-
+	params := (&auth.UserToCreate{}).
+		UID(uid).
+		Email("user@example.com").
+		PhoneNumber("+15555550100")
+	u, err := client.CreateUser(context.Background(), params)
 	if err != nil {
 		log.Fatalf("error creating user: %v\n", err)
 	}
 	log.Printf("Successfully created user: %v\n", u)
 	// [END create_user_with_uid]
-	return u2
+	return u
 }
 
-func updateUser(ctx context.Context, client *auth.Client) (*auth.UserRecord, *auth.UserRecord) {
+func updateUser(ctx context.Context, client *auth.Client) {
 	uid := "d"
 	// [START update_user]
-	u, err := client.UpdateUser(context.Background(), uid,
-		(&auth.UserToUpdate{}).
-			Email("user@example.com").
-			EmailVerified(true).
-			PhoneNumber("+15555550100").
-			Password("newPassword").
-			DisplayName("John Doe").
-			PhotoURL("http://www.example.com/12345678/photo.png").
-			Disabled(true))
-	// Alternatively
-	params := auth.UserToUpdate{} // also possible: 	var params auth.UserToUpdate
-	u2, err := client.UpdateUser(context.Background(), uid,
-		params.Email("user@example.com").PhoneNumber("+15555550100"))
-
+	params := (&auth.UserToUpdate{}).
+		Email("user@example.com").
+		EmailVerified(true).
+		PhoneNumber("+15555550100").
+		Password("newPassword").
+		DisplayName("John Doe").
+		PhotoURL("http://www.example.com/12345678/photo.png").
+		Disabled(true)
+	u, err := client.UpdateUser(context.Background(), uid, params)
 	if err != nil {
 		log.Fatalf("error updating user: %v\n", err)
 	}
 	log.Printf("Successfully updated user: %v\n", u)
 	// [END update_user]
-	return u, u2
 }
 
 func deleteUser(ctx context.Context, client *auth.Client) {
@@ -306,21 +298,29 @@ func deleteUser(ctx context.Context, client *auth.Client) {
 	// [END delete_user]
 }
 
-func customClaims(ctx context.Context, client *auth.Client) {
+func customClaims(ctx context.Context, app *firebase.App) {
 	uid := "uid"
-	// erase all existing custom claims
-	err := client.SetCustomUserClaims(context.Background(), uid, nil)
-	if err != nil {
-		log.Fatalf("error removing custom claims %v", err)
-	}
 	// [START custom_claims]
-	// Set custom claims.
+	// Get an auth client from the firebase.App
+	client, err := app.Auth(context.Background())
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+
+	// Set admin privilege on the user corresponding to uid.
 	claims := map[string]interface{}{"admin": true}
 	err = client.SetCustomUserClaims(context.Background(), uid, claims)
 	if err != nil {
 		log.Fatalf("error setting custom claims %v", err)
 	}
+	// The new custom claims will propagate to the user's ID token the
+	// next time a new one is issued.
 	// [END custom_claims]
+	// erase all existing custom claims
+	err = client.SetCustomUserClaims(context.Background(), uid, nil)
+	if err != nil {
+		log.Fatalf("error removing custom claims %v", err)
+	}
 
 	// Alternatively
 	_, err = client.UpdateUser(context.Background(), uid,
@@ -344,9 +344,11 @@ func listUsers(ctx context.Context, client *auth.Client) {
 
 	}
 
-	// Iterating by pages 7 users at a time
+	// Iterating by pages 100 users at a time.
+	// Note that using both the Next() function on an iterator and the NextPage()
+	// on a Pager wrapping that same iterator will result in an error.
 	iter2 := client.Users(context.Background(), "")
-	pager := iterator.NewPager(iter2, 7, "")
+	pager := iterator.NewPager(iter2, 100, "")
 	for {
 		var users []*auth.ExportedUserRecord
 		nextPageToken, err := pager.NextPage(&users)
