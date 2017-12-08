@@ -310,7 +310,7 @@ func customClaimsSet(ctx context.Context, app *firebase.App) {
 	claims := map[string]interface{}{"admin": true}
 	err = client.SetCustomUserClaims(context.Background(), uid, claims)
 	if err != nil {
-		log.Fatalf("error setting custom claims %v", err)
+		log.Fatalf("error setting custom claims %v\n", err)
 	}
 	// The new custom claims will propagate to the user's ID token the
 	// next time a new one is issued.
@@ -363,7 +363,11 @@ func customClaimsScript(ctx context.Context, client *auth.Client) {
 	if user.EmailVerified {
 		// Add custom claims for additional privileges.
 		// This will be picked up by the user on token refresh or next sign in on new device.
-		client.SetCustomUserClaims(ctx, user.UID, map[string]interface{}{"admin": true})
+		err := client.SetCustomUserClaims(ctx, user.UID, map[string]interface{}{"admin": true})
+		if err != nil {
+			log.Fatalf("error setting custom claims %v\n", err)
+		}
+
 	}
 	// [END set_custom_user_claims_script]
 }
@@ -384,7 +388,11 @@ func customClaimsIncremental(ctx context.Context, client *auth.Client) {
 		// Add level.
 		currentCustomClaims["ssLevel"] = 10
 		// Add custom claims for additional privileges.
-		client.SetCustomUserClaims(ctx, user.UID, currentCustomClaims)
+		err := client.SetCustomUserClaims(ctx, user.UID, currentCustomClaims)
+		if err != nil {
+			log.Fatalf("error setting custom claims %v\n", err)
+		}
+
 	}
 	// [END set_custom_user_claims_incremental]
 }
@@ -412,7 +420,7 @@ func listUsers(ctx context.Context, client *auth.Client) {
 		var users []*auth.ExportedUserRecord
 		nextPageToken, err := pager.NextPage(&users)
 		if err != nil {
-			log.Fatalf("paging error %v", err)
+			log.Fatalf("paging error %v\n", err)
 		}
 		for _, u := range users {
 			log.Printf("read user user: %v\n", u)
