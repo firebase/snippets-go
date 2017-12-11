@@ -386,7 +386,7 @@ func customClaimsIncremental(ctx context.Context, client *auth.Client) {
 
 	if _, found := currentCustomClaims["admin"]; found {
 		// Add level.
-		currentCustomClaims["ssLevel"] = 10
+		currentCustomClaims["accessLevel"] = 10
 		// Add custom claims for additional privileges.
 		err := client.SetCustomUserClaims(ctx, user.UID, currentCustomClaims)
 		if err != nil {
