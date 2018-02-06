@@ -209,6 +209,13 @@ func revokeRefreshTokens(app *firebase.App, uid string) {
 	}
 	// N.B the database API is not yet implemented in go, check the state of
 	// the tokens as not revoked with VerifyIDTokenAndCheckRevoked().
+
+	// accessing the user's
+	u, err := client.GetUser(ctx, uid)
+	if err != nil {
+		log.Fatalf("error getting user %s: %v\n", uid, err)
+	}
+	log.Println("the refresh tokens were revoked at: ", u.TokensValidAfterMillis)
 	// [END revoke_tokens]
 }
 
