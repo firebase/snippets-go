@@ -186,6 +186,58 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 }
 
 // ==================================================================
+// https://firebase.google.com/docs/auth/admin/manage-sessions
+// ==================================================================
+
+func revokeRefreshTokens(app *firebase.App, uid string) {
+	// [START revoke_tokens]
+	// For other initialization options see:
+	// https://firebase.google.com/docs/admin/setup
+
+	opt := option.WithCredentialsFile("path/to/serviceAccountKey.json")
+	ctx := context.Background()
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+	client, err := app.Auth(ctx)
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+	if err := client.RevokeRefreshTokens(context.Background(), uid); err != nil {
+		log.Fatalf("error revoking tokens for user: %v, %v\n", uid, err)
+	}
+	// N.B the database API is not yet implemented in go, check the state of
+	// the tokens as not revoked with VerifyIDTokenAndCheckRevoked().
+	// [END revoke_tokens]
+}
+
+func verifyIDTokenAndCheckRevoked(app *firebase.App, idToken string) *auth.Token {
+	ctx := context.Background()
+	// [START verify_id_token_and_check_revoked]
+
+	client, err := app.Auth(ctx)
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+
+	token, err := client.VerifyIDTokenAndCheckRevoked(ctx, idToken)
+	if err != nil {
+		if err.Error() == "ID token has been revoked" {
+			log.Println("the token is valid but has been revoked")
+			// When this occurs, inform the user to reauthenticate or signOut() the user.
+		} else {
+			log.Fatalf("error verifying ID token: %v\n", err)
+		}
+	}
+
+	log.Printf("Verified ID token: %v\n", token)
+	// [END verify_id_token_and_check_revoked]
+
+	return token
+}
+
+// ==================================================================
 // https://firebase.google.com/docs/auth/admin/manage-users
 // ==================================================================
 
