@@ -190,21 +190,14 @@ func verifyIDToken(app *firebase.App, idToken string) *auth.Token {
 // ==================================================================
 
 func revokeRefreshTokens(app *firebase.App, uid string) {
-	// [START revoke_tokens]
-	// For other initialization options see:
-	// https://firebase.google.com/docs/admin/setup
 
-	opt := option.WithCredentialsFile("path/to/serviceAccountKey.json")
+	// [START revoke_tokens]
 	ctx := context.Background()
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
-	}
 	client, err := app.Auth(ctx)
 	if err != nil {
 		log.Fatalf("error getting Auth client: %v\n", err)
 	}
-	if err := client.RevokeRefreshTokens(context.Background(), uid); err != nil {
+	if err := client.RevokeRefreshTokens(ctx, uid); err != nil {
 		log.Fatalf("error revoking tokens for user: %v, %v\n", uid, err)
 	}
 	// N.B the database API is not yet implemented in go, check the state of
