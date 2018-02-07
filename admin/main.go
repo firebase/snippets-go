@@ -16,9 +16,8 @@ package main
 
 // [START admin_import]
 import (
+	"context"
 	"log"
-
-	"golang.org/x/net/context"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
