@@ -204,20 +204,18 @@ func revokeRefreshTokens(app *firebase.App, uid string) {
 	if err != nil {
 		log.Fatalf("error getting user %s: %v\n", uid, err)
 	}
-	log.Printf("the refresh tokens were revoked at: %d (UTC seconds) ",
-		u.TokensValidAfterMillis/1000)
+	timestamp := u.TokensValidAfterMillis / 1000
+	log.Printf("the refresh tokens were revoked at: %d (UTC seconds) ", timestamp)
 	// [END revoke_tokens]
 }
 
 func verifyIDTokenAndCheckRevoked(app *firebase.App, idToken string) *auth.Token {
 	ctx := context.Background()
 	// [START verify_id_token_and_check_revoked]
-
 	client, err := app.Auth(ctx)
 	if err != nil {
 		log.Fatalf("error getting Auth client: %v\n", err)
 	}
-	// As opposed to the other SDKs, Go has a dedicated function to check revoaction status.
 	token, err := client.VerifyIDTokenAndCheckRevoked(ctx, idToken)
 	if err != nil {
 		if err.Error() == "ID token has been revoked" {
