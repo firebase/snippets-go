@@ -219,13 +219,11 @@ func verifyIDTokenAndCheckRevoked(app *firebase.App, idToken string) *auth.Token
 	token, err := client.VerifyIDTokenAndCheckRevoked(ctx, idToken)
 	if err != nil {
 		if err.Error() == "ID token has been revoked" {
-			log.Println(err)
-			// When this occurs, inform the user to reauthenticate or signOut() the user.
+			// Token is revoked. Inform the user to reauthenticate or signOut() the user.
 		} else {
-			log.Fatalf("error verifying ID token: %v\n", err)
+			// Token is invalid
 		}
 	}
-
 	log.Printf("Verified ID token: %v\n", token)
 	// [END verify_id_token_and_check_revoked]
 
