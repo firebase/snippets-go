@@ -224,7 +224,7 @@ func verifyIDTokenAndCheckRevoked(app *firebase.App, idToken string) *auth.Token
 			// Token is invalid
 		}
 	}
-	// else, Token is valid
+	log.Printf("Verified ID token: %v\n", token)
 	// [END verify_id_token_and_check_revoked]
 
 	return token
